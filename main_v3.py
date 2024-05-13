@@ -102,6 +102,16 @@ def digitalOut(pinout=21, enable=False):
     enable = 'true' if enable == True else 'false'
     data = f'CRISTART {cmdCnt} CMD DOUT' + ' ' + str(pinout) + ' ' + str(enable) + ' ' + 'CRIEND'
     s.send(data.encode())  
+    
+def enableRobot():
+    global cmdCnt
+    data = f'CRISTART {cmdCnt} CMD Enable CRIEND'
+    s.send(data.encode())
+    
+def resetRobot():
+    global cmdCnt
+    data = f'CRISTART {cmdCnt} CMD Reset CRIEND'
+    s.send(data.encode())
 
 daemon = Thread(target=backgroundAlive, daemon=True, name='Monitor')
 daemon.start()
@@ -110,56 +120,15 @@ daemon.start()
 
 
 while True:
-    
-    #user dialog box
-    inputCode = simpledialog.askstring(title="Robot Testing Menu",
-                                      prompt="Input:\n1 - Move to position 1\n2 - Move to position 2\n3 - Enable Robot\n4 - Reset Robot\n5 - GetRefInfo\n6 - Display Status Message\n7 - Reference J1\n8 - Reference J2\n9 - Reference J3")    
-    #Sending the coordinate for position 1
-    if inputCode == "1":
-        moveCommand(20.0, 10.0, 20.0, 0.0, 10.0, 0.0, 10, 'Joint')  #A1,A2,A3,A4,A5,A6. if your robot is 3 axis, you may set A4 - A6 as "0.0"      
-        moveCommand(15.0, 15.0, 15.0, 10.0, 0.0, 0.0, 20, 'Joint')
-        moveCommand(45.0, 55.0, 15.0, 0.0, 0.0, 0.0, 30, 'Joint')
-        moveCommand(15.0, 15.0, 40.0, 30.0, 40.0, 0.0, 30, 'Joint')
-        
-    #Sending the coordinate for position 2 
-    if inputCode == "2":
-        moveCommand(5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 'Cart')  #A1,A2,A3,A4,A5,A6. if your robot is 3 axis, you may set A4 - A6 as "0.0" 
-        time.sleep(1)   
-        
-    #Sending command to enable to robot
-    if inputCode == "3":
-        data = 'CRISTART 1234 CMD Enable CRIEND'
-        s.send(data.encode())
-        
-    #Sending command to reset the robot
-    if inputCode == "4":
-        data = 'CRISTART 1234 CMD Reset CRIEND'
-        s.send(data.encode())
-        
-    #Sending command to enable gripper robot
-    if inputCode == "5":
-        digitalOut(21, True)
-        
-        #Sending command to disable gipper robot
-    if inputCode == "6":
-        digitalOut(21, False)
-        
-    #Send command for individual joint referencing
-    if inputCode == "7":
-        data = 'CRISTART 1234 CMD MotionTypeCartBase CRIEND '
-        s.send(data.encode())    
-    
-    if inputCode == "8":
-        data = 'CRISTART 1234 CMD ReferenceSingleJoint 1 CRIEND'
-        s.send(data.encode())       
-        
-    if inputCode == "9":
-        data = 'CRISTART 1234 CMD ReferenceSingleJoint 2 CRIEND'
-        s.send(data.encode())
-
-    if inputCode == 'x':
-        with open("output_v3.txt", "w") as text_file:
-            text_file.write(str(output))
-        sys.exit()
+    moveCommand(20.0, 10.0, 20.0, 0.0, 10.0, 0.0, 10, 'Joint')  #A1,A2,A3,A4,A5,A6. if your robot is 3 axis, you may set A4 - A6 as "0.0"      
+    moveCommand(15.0, 15.0, 15.0, 10.0, 0.0, 0.0, 20, 'Joint')
+    digitalOut(21, True)
+    moveCommand(45.0, 55.0, 15.0, 0.0, 0.0, 0.0, 30, 'Joint')
+    digitalOut(21, False)
+    moveCommand(15.0, 15.0, 40.0, 30.0, 40.0, 0.0, 30, 'Joint')
+    # save log to file
+    with open("output_v3.txt", "w") as text_file:
+        text_file.write(str(output))
+    sys.exit()
         
         

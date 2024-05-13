@@ -1,9 +1,10 @@
 import time
 
 class RobotRebel:
-    def __init__(self, socket, moveFlag):
+    def __init__(self, socket, moveFlag, cmdCnt):
         self.socket = socket
         self.moveFlag = moveFlag
+        self.cmdCnt = cmdCnt
     
     def writeLoop(self):
         while True:
@@ -39,7 +40,8 @@ class RobotRebel:
                         self.moveFlag = False
                         print(data)
                         print(f"move => {self.moveFlag}")
-
+                    # counter
+                    self.cmdCnt = self.cmdCnt+1
                 except BlockingIOError:
                     print("no data")
                     
@@ -56,9 +58,15 @@ class RobotRebel:
         self.socket.send(data.encode())
     
     def moveCommand(self, a1, a2, a3, a4, a5, a6, speed=10, moveType='Joint'):
-        data = 'CRISTART 18 CMD Move ' + f'{moveType}' + ' ' + str(a1) + ' ' + str(a2) + ' ' + str(a3) + ' ' + str(a4) + ' ' + str(a5) + ' ' + str(a6) + ' 0 0 0 ' + f'{speed}' + ' CRIEND'
+        data = f'CRISTART {self.cmdCnt} CMD Move ' + f'{moveType}' + ' ' + str(a1) + ' ' + str(a2) + ' ' + str(a3) + ' ' + str(a4) + ' ' + str(a5) + ' ' + str(a6) + ' 0 0 0 ' + f'{speed}' + ' CRIEND'
         self.socket.send(data.encode())
         while True:
-            print(f"testing ==> {self.moveFlag}")
+            # print(f"testing ==> {self.moveFlag}")
             if self.moveFlag == False:
                 break
+            
+    def digitalOut(self, pinout=21, enable=False):
+        #CRISTART 1234 CMD DOUT 21 true CRIEND
+        enable = 'true' if enable == True else 'false'
+        data = f'CRISTART {self.cmdCnt} CMD DOUT' + ' ' + str(pinout) + ' ' + str(enable) + ' ' + 'CRIEND'
+        self.socket.send(data.encode())  

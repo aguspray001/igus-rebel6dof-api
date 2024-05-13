@@ -29,8 +29,9 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 output = []
 moveFlag = True
+cmdCnt = 1
 
-rebel = robot.RobotRebel(s, moveFlag)
+rebel = robot.RobotRebel(s, moveFlag, cmdCnt)
 
 daemon = Thread(target=rebel.writeLoop, daemon=True, name='Monitor')
 daemon.start()
